@@ -1,8 +1,3 @@
-import { model } from "./research-agent/llm";
+import { createAnalystGraph } from "./research-agent/graphs/create-analysts.graph";
 
-const testModel = async () => {
-  const response = await model.invoke("who are you?");
-  console.log("gpt-4o response:", response);
-};
-
-testModel();
+const graphTest = () => {};
