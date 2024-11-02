@@ -1,4 +1,5 @@
 import { createAnalystGraph } from "./research-agent/graphs/create-analysts.graph";
+import { drawGraph } from "./research-agent/utils";
 
 const input = {
   max_analysts: 3,
@@ -7,7 +8,7 @@ const input = {
 
 let config = { configurable: { thread_id: "conversation-num-1" } };
 
-const graphTest = async () => {
+const createAnalystsTest = async () => {
   console.log("--GRAPH EXECUTION STARTS--");
 
   for await (const chunk of await createAnalystGraph.stream(input, {
@@ -65,7 +66,9 @@ const graphTest = async () => {
 
   console.log("final analysts:", analysts);
 
+  await drawGraph(createAnalystGraph);
+
   console.log("--GRAPH EXECUTION ENDS--");
 };
 
-graphTest();
+createAnalystsTest();
