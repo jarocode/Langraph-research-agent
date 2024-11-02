@@ -9,10 +9,14 @@ const builder = new StateGraph(GenerateAnalystState)
   .addNode("human_feedback", humanFeedback)
   .addEdge(START, "create_analysts")
   .addEdge("create_analysts", "human_feedback")
-  .addConditionalEdges("human_feedback", shouldContinue, [
-    "create_analysts",
-    END,
-  ]);
+  .addConditionalEdges(
+    "human_feedback",
+    shouldContinue
+    //   {
+    //   true: "create_analysts",
+    //   false: END,
+    // }
+  );
 
 // const builder = new StateGraph(GenerateAnalystState)
 //   .addNode("create_analysts", createAnalysts)

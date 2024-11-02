@@ -13,7 +13,13 @@ type Analysts = {
 export const createAnalysts = async (
   state: typeof GenerateAnalystState.State
 ) => {
+  console.log("--- createAnalyst Node ---");
   const { topic, max_analysts, human_analyst_feedback } = state;
+
+  console.log(
+    "value of human_analyst_feedback in createAnalyst Node :",
+    human_analyst_feedback
+  );
 
   // Set up a parser
   const parser = new JsonOutputParser<Analysts>();
@@ -35,17 +41,25 @@ export const createAnalysts = async (
   });
   console.log("analysts:", analysts);
   return {
-    analysts: analysts,
+    analysts: analysts.analyst,
   };
 };
 
 export const humanFeedback = (state: typeof GenerateAnalystState.State) => {
+  console.log("--- humanFeedback ---");
   return state;
 };
 
 export const shouldContinue = (state: typeof GenerateAnalystState.State) => {
+  console.log("--Conditional edge function--");
   //check if human feedback
   const human_analyst_feedback = state.human_analyst_feedback;
+
+  console.log(
+    "value of human_analyst_feedback in shouldContinue func:",
+    state.human_analyst_feedback
+  );
+
   if (human_analyst_feedback) return "create_analyts";
 
   //otherwise end
