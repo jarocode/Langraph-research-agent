@@ -14,3 +14,11 @@ export const GenerateAnalystState = Annotation.Root({
   human_analyst_feedback: Annotation<string>, //human feedback
   analysts: Annotation<Analyst[]>, //Analyst asking questions
 });
+
+export const InterviewState = Annotation.Root({
+  max_num_turns: Annotation<number>, //Number turns of conversation
+  context: Annotation<[]>, //Source docs
+  analyst: Annotation<Analyst>, //Analyst asking questions
+  interview: Annotation<string>, //Interview transcript
+  sections: Annotation<[]>, //Final key we duplicate in outer state for Send() API
+});

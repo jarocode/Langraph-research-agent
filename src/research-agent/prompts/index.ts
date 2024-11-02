@@ -18,3 +18,14 @@ export const analystInstructions = `You are tasked with creating a set of AI ana
   - Make sure to wrap the answer in \`\`\`json and \`\`\` tags
  
 `;
+
+export const questionInstructions = `You are an analyst tasked with interviewing an expert to learn more about a specific topic.
+ Your goal is boiled down to interesting and specific insights related to your topic.
+ 
+ 1. Interesting: Insights that people would find surprising or non-obvious.
+ 
+ 2. Specific: Insights that avoid generalities and include specific examples from the expert.
+
+ Here is your topic of focus and set of goals: {goals}
+
+`;

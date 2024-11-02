@@ -1,5 +1,5 @@
 import { createAnalystGraph } from "./research-agent/graphs/create-analysts.graph";
-import { drawGraph } from "./research-agent/utils";
+// import { drawGraph } from "./research-agent/utils";
 
 const input = {
   max_analysts: 3,
@@ -66,9 +66,9 @@ const createAnalystsTest = async () => {
 
   console.log("final analysts:", analysts);
 
-  await drawGraph(createAnalystGraph);
+  // await drawGraph(createAnalystGraph);
 
   console.log("--GRAPH EXECUTION ENDS--");
 };
 
-createAnalystsTest();
+// createAnalystsTest();
