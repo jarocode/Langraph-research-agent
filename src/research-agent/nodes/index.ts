@@ -57,10 +57,10 @@ export const shouldContinue = (state: typeof GenerateAnalystState.State) => {
 
   console.log(
     "value of human_analyst_feedback in shouldContinue func:",
-    state.human_analyst_feedback
+    human_analyst_feedback
   );
 
-  if (human_analyst_feedback) return "create_analyts";
+  if (human_analyst_feedback) return "create_analysts";
 
   //otherwise end
   return END;

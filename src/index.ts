@@ -23,7 +23,7 @@ const graphTest = async () => {
   console.log(`Graph interrupted before ${state.next[0]} node`);
 
   // Update the state with the user input as if it was the human_feedback node
-  const human_analyst_feedback =
+  let human_analyst_feedback =
     "Add in someone from a startup to add an entrepreneur perspective";
 
   await createAnalystGraph.updateState(config, {
@@ -43,6 +43,27 @@ const graphTest = async () => {
     console.log(event.analysts);
     console.log("\n====\n");
   }
+
+  //no further human feedback
+  human_analyst_feedback = "";
+  await createAnalystGraph.updateState(config, {
+    human_analyst_feedback,
+    asNode: "human_feedback",
+  });
+
+  // Continue the graph execution to the end
+  for await (const event of await createAnalystGraph.stream(null, {
+    ...config,
+    streamMode: "updates",
+  })) {
+    console.log(event.analysts);
+    console.log("\n====\n");
+  }
+
+  const finalState = await createAnalystGraph.getState(config);
+  const analysts = finalState.values.analysts;
+
+  console.log("final analysts:", analysts);
 
   console.log("--GRAPH EXECUTION ENDS--");
 };
