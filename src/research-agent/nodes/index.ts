@@ -1,5 +1,5 @@
 import { END } from "@langchain/langgraph";
-import { PromptTemplate, ChatPromptTemplate } from "@langchain/core/prompts";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
 
 import { model } from "../llm";
@@ -18,31 +18,15 @@ export const createAnalysts = async (
   // Set up a parser
   const parser = new JsonOutputParser<Analysts>();
 
-  //prompt
-  const analyst_instructions = PromptTemplate.fromTemplate(analystInstructions);
+  //output schema
+  const schema = `{{ analyst: [{{ affiliation: "string", name: "string", role: "string", description: "string", persona: "(self: string) => void" }}] }}`;
 
-  //Enforce structured output
-  //   const structured_llm = model.withStructuredOutput()
-  const structured_llm = model;
-
-  const systemMessage = await analyst_instructions.format({
-    topic,
-    max_analysts,
-    human_analyst_feedback,
-  });
-
-  const analyst_prompt = ChatPromptTemplate.fromMessages([
+  const analyst_prompt = await ChatPromptTemplate.fromMessages([
     ["system", analystInstructions],
     ["user", "Generate the set of analysts"],
-  ]);
+  ]).partial({ schema });
 
   const chain = analyst_prompt.pipe(model).pipe(parser);
-
-  //Generate analysts
-  // const analysts = structured_llm.invoke([
-  //   { role: "system", content: systemMessage },
-  //   { role: "user", content: "" },
-  // ]);
 
   const analysts = await chain.invoke({
     topic,
@@ -51,7 +35,7 @@ export const createAnalysts = async (
   });
   console.log("analysts:", analysts);
   return {
-    analysts: analysts.analyst,
+    analysts: analysts,
   };
 };
 

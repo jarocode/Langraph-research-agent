@@ -12,5 +12,9 @@ export const analystInstructions = `You are tasked with creating a set of AI ana
 4. Pick the top {max_analysts} themes.
 
 5. Assign one analyst to each theme."""
+
+ RULES
+  - Output your answer as JSON that matches the given schema:  \`\`\`json\n{schema}\n\`\`\`.
+  - Make sure to wrap the answer in \`\`\`json and \`\`\` tags
  
 `;

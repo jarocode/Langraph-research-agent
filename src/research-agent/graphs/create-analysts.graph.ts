@@ -14,6 +14,11 @@ const builder = new StateGraph(GenerateAnalystState)
     END,
   ]);
 
+// const builder = new StateGraph(GenerateAnalystState)
+//   .addNode("create_analysts", createAnalysts)
+//   .addEdge(START, "create_analysts")
+//   .addEdge("create_analysts", END);
+
 // Set up memory
 const memory = new MemorySaver();
 
