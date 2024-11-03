@@ -1,10 +1,11 @@
 import { END } from "@langchain/langgraph";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { ChatPromptTemplate, PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
 
 import { model } from "../llm";
-import { GenerateAnalystState, Analyst } from "../states";
-import { analystInstructions } from "../prompts";
+import { GenerateAnalystState, Analyst, InterviewState } from "../states";
+import { analystInstructions, questionInstructions } from "../prompts";
+import { SystemMessage } from "@langchain/core/messages";
 
 type Analysts = {
   analyst: Analyst[];
@@ -25,7 +26,7 @@ export const createAnalysts = async (
   const parser = new JsonOutputParser<Analysts>();
 
   //output schema
-  const schema = `{{ analyst: [{{ affiliation: "string", name: "string", role: "string", description: "string", persona: "(self: string) => void" }}] }}`;
+  const schema = `{{ analyst: [{{ affiliation: "string", name: "string", role: "string", description: "string", persona: "string" }}] }}`;
 
   const analyst_prompt = await ChatPromptTemplate.fromMessages([
     ["system", analystInstructions],
@@ -64,4 +65,31 @@ export const shouldContinue = (state: typeof GenerateAnalystState.State) => {
 
   //otherwise end
   return END;
+};
+
+//generate question nodes
+export const generateQuestion = async (state: typeof InterviewState.State) => {
+  console.log("-- Generate Question Node --");
+
+  //Get state
+  const analyst = state.analyst;
+  const messages = state.messages;
+
+  //Generate question
+  const systemMessage = await PromptTemplate.fromTemplate(
+    questionInstructions
+  ).format({ goals: analyst.persona });
+
+  console.log("analyst persona:", analyst.persona);
+
+  const question = await model.invoke([
+    new SystemMessage({ content: systemMessage }),
+    ...messages,
+  ]);
+
+  //Write messages to state.
+
+  return {
+    messages: [question],
+  };
 };

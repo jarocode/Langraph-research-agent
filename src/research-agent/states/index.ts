@@ -1,11 +1,11 @@
-import { Annotation } from "@langchain/langgraph";
+import { Annotation, MessagesAnnotation } from "@langchain/langgraph";
 
 export interface Analyst {
   affiliation: string;
   name: string;
   role: string;
   description: string;
-  persona: (self: string) => string;
+  persona: string;
 }
 
 export const GenerateAnalystState = Annotation.Root({
@@ -16,6 +16,7 @@ export const GenerateAnalystState = Annotation.Root({
 });
 
 export const InterviewState = Annotation.Root({
+  ...MessagesAnnotation.spec,
   max_num_turns: Annotation<number>, //Number turns of conversation
   context: Annotation<[]>, //Source docs
   analyst: Annotation<Analyst>, //Analyst asking questions
