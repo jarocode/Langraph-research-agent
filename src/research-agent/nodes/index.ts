@@ -1,14 +1,23 @@
 import { END } from "@langchain/langgraph";
 import { ChatPromptTemplate, PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
+import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 
 import { model } from "../llm";
 import { GenerateAnalystState, Analyst, InterviewState } from "../states";
-import { analystInstructions, questionInstructions } from "../prompts";
+import {
+  analystInstructions,
+  questionInstructions,
+  searchInstructions,
+} from "../prompts";
 import { SystemMessage } from "@langchain/core/messages";
 
 type Analysts = {
   analyst: Analyst[];
+};
+
+type SearchQuery = {
+  searchQuery: string;
 };
 
 export const createAnalysts = async (
@@ -92,4 +101,22 @@ export const generateQuestion = async (state: typeof InterviewState.State) => {
   return {
     messages: [question],
   };
+};
+
+export const searchWeb = async (state: typeof InterviewState.State) => {
+  console.log("-- Node for retrieving docs form webite --");
+
+  const messages = state.messages;
+
+  const parser = new JsonOutputParser<SearchQuery>();
+
+  const searchPrompt = PromptTemplate.fromTemplate(searchInstructions);
+
+  const tavilySearch = new TavilySearchResults({ maxResults: 3 });
+
+  const searchChain = searchPrompt.pipe(model).pipe(parser);
+
+  const searchQuery = await searchChain.invoke({ conversation: messages });
+
+  const searchDocs = tavilySearch.invoke(searchQuery.searchQuery);
 };
