@@ -56,7 +56,7 @@ conversation: {conversation}
 
 export const answerInstructions = `You are an expert being interviewed by an analyst.
  
-here is the analyst area of focus: {goals}.
+here is the analyst area of focus: {goals}
 
 Your goal is to answer a question posed by the interviewer.
 

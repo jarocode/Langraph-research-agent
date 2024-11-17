@@ -2,15 +2,18 @@ import { END } from "@langchain/langgraph";
 import { ChatPromptTemplate, PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
+import { SystemMessage } from "@langchain/core/messages";
 
 import { model } from "../llm";
 import { GenerateAnalystState, Analyst, InterviewState } from "../states";
 import {
   analystInstructions,
+  answerInstructions,
   questionInstructions,
   searchInstructions,
 } from "../prompts";
-import { SystemMessage } from "@langchain/core/messages";
+
+import { queryMediaWiki, WikipediaSearchResult } from "../../utils/helpers";
 
 type Analysts = {
   analyst: Analyst[];
@@ -104,7 +107,7 @@ export const generateQuestion = async (state: typeof InterviewState.State) => {
 };
 
 export const searchWeb = async (state: typeof InterviewState.State) => {
-  console.log("-- Node for retrieving docs form webite --");
+  console.log("-- Node for retrieving docs form website --");
 
   const messages = state.messages;
 
@@ -118,5 +121,56 @@ export const searchWeb = async (state: typeof InterviewState.State) => {
 
   const searchQuery = await searchChain.invoke({ conversation: messages });
 
-  const searchDocs = tavilySearch.invoke(searchQuery.searchQuery);
+  const searchDocs = await tavilySearch.invoke(searchQuery.searchQuery);
+  const formattedSearchDocs = searchDocs.map((data: any) => {
+    return `<Document href=${data.url}>${data.content}</Document>`;
+  });
+
+  return {
+    context: [formattedSearchDocs],
+  };
+};
+
+export const searchWikipedia = async (state: typeof InterviewState.State) => {
+  console.log("-- Node for retrieving docs form Wikipedia --");
+
+  const messages = state.messages;
+
+  const parser = new JsonOutputParser<SearchQuery>();
+
+  const searchPrompt = PromptTemplate.fromTemplate(searchInstructions);
+
+  const searchChain = searchPrompt.pipe(model).pipe(parser);
+
+  const searchQuery = await searchChain.invoke({ conversation: messages });
+
+  const searchDocs = await queryMediaWiki(searchQuery.searchQuery);
+
+  const formattedSearchDocs = searchDocs.map((data: WikipediaSearchResult) => {
+    return `<Document source=${data.pageUrl} page=${data.pageNumber}>${data.fullContent}</Document>`;
+  });
+
+  return {
+    context: [formattedSearchDocs],
+  };
+};
+
+export const generateAnswer = async (state: typeof InterviewState.State) => {
+  console.log("-- Node to answer a question --");
+
+  const { analyst, messages, context } = state;
+
+  //answer question
+  const systemMessage = await PromptTemplate.fromTemplate(
+    questionInstructions
+  ).format({ goals: analyst.persona, context });
+
+  const answer = await model.invoke([
+    new SystemMessage({ content: systemMessage }),
+    ...messages,
+  ]);
+
+  return {
+    messages: [answer],
+  };
 };
