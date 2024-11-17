@@ -72,21 +72,3 @@
 // };
 
 // // createAnalystsTest();
-
-import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
-
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const runTool = async () => {
-  const tool = new TavilySearchResults({
-    maxResults: 2,
-  });
-
-  const res = await tool.invoke("Langchain");
-
-  console.log(res);
-};
-
-runTool();

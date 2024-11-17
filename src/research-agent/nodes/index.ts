@@ -2,7 +2,7 @@ import { END } from "@langchain/langgraph";
 import { ChatPromptTemplate, PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
-import { SystemMessage } from "@langchain/core/messages";
+import { AIMessage, SystemMessage } from "@langchain/core/messages";
 
 import { model } from "../llm";
 import { GenerateAnalystState, Analyst, InterviewState } from "../states";
@@ -162,7 +162,7 @@ export const generateAnswer = async (state: typeof InterviewState.State) => {
 
   //answer question
   const systemMessage = await PromptTemplate.fromTemplate(
-    questionInstructions
+    answerInstructions
   ).format({ goals: analyst.persona, context });
 
   const answer = await model.invoke([
@@ -170,7 +170,51 @@ export const generateAnswer = async (state: typeof InterviewState.State) => {
     ...messages,
   ]);
 
+  //name the message as coming from the expert
+  answer.name = "expert";
+
   return {
     messages: [answer],
   };
+};
+
+export const saveInterview = async (state: typeof InterviewState.State) => {
+  console.log("-- Save interviews --");
+
+  const { messages } = state;
+
+  //Convert interview to a string.
+  const interview = messages.toString();
+
+  return {
+    interview,
+  };
+};
+
+export const routeMessages = async (
+  state: typeof InterviewState.State,
+  name = "expert"
+) => {
+  console.log("-- Route between question and answer --");
+  const { messages, max_num_turns } = state;
+
+  //Check the number of expert answers
+  let numOfExpertResponses: number = 0;
+  for (const message of messages) {
+    if (message instanceof AIMessage && message.name === name)
+      numOfExpertResponses++;
+  }
+
+  //End if expert has answered more than the max turns
+  if (numOfExpertResponses >= max_num_turns) return "saveInterview";
+
+  //This router is run after each question - answer pair
+  //Get the last question asked to check if it signals the end of discussion
+  const lastQuestion = messages[messages.length - 1];
+  if (
+    lastQuestion.content.toString().includes("Thank you so much for your help")
+  )
+    return "saveInterview";
+
+  return "askQuestions";
 };
