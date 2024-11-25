@@ -2,7 +2,11 @@ import { END } from "@langchain/langgraph";
 import { ChatPromptTemplate, PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
-import { AIMessage, SystemMessage } from "@langchain/core/messages";
+import {
+  AIMessage,
+  HumanMessage,
+  SystemMessage,
+} from "@langchain/core/messages";
 
 import { model } from "../llm";
 import { GenerateAnalystState, Analyst, InterviewState } from "../states";
@@ -11,6 +15,7 @@ import {
   answerInstructions,
   questionInstructions,
   searchInstructions,
+  sectionWriterInstructions,
 } from "../prompts";
 
 import { queryMediaWiki, WikipediaSearchResult } from "../../utils/helpers";
@@ -206,7 +211,7 @@ export const routeMessages = async (
   }
 
   //End if expert has answered more than the max turns
-  if (numOfExpertResponses >= max_num_turns) return "saveInterview";
+  if (numOfExpertResponses >= max_num_turns) return "save_interview";
 
   //This router is run after each question - answer pair
   //Get the last question asked to check if it signals the end of discussion
@@ -214,7 +219,29 @@ export const routeMessages = async (
   if (
     lastQuestion.content.toString().includes("Thank you so much for your help")
   )
-    return "saveInterview";
+    return "save_interview";
 
-  return "askQuestions";
+  return "ask_question";
+};
+
+export const writeSection = async (state: typeof InterviewState.State) => {
+  console.log("-- Node to answer a question --");
+
+  const { context, analyst } = state;
+
+  //Write section using either the gathered source docs from interview (context) or the interview itself (interview)
+  const systemMessage = await PromptTemplate.fromTemplate(
+    sectionWriterInstructions
+  ).format({ focus: analyst.description });
+
+  const section = await model.invoke([
+    new SystemMessage({ content: systemMessage }),
+    new HumanMessage({
+      content: `Use this source to write your section: ${context}`,
+    }),
+  ]);
+
+  return {
+    sections: [section.content],
+  };
 };
