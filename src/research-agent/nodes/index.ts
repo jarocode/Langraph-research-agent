@@ -112,7 +112,7 @@ export const generateQuestion = async (state: typeof InterviewState.State) => {
 };
 
 export const searchWeb = async (state: typeof InterviewState.State) => {
-  console.log("-- Node for retrieving docs form website --");
+  console.log("-- Node for retrieving docs from website --");
 
   const messages = state.messages;
 
@@ -137,7 +137,7 @@ export const searchWeb = async (state: typeof InterviewState.State) => {
 };
 
 export const searchWikipedia = async (state: typeof InterviewState.State) => {
-  console.log("-- Node for retrieving docs form Wikipedia --");
+  console.log("-- Node for retrieving docs from Wikipedia --");
 
   const messages = state.messages;
 
@@ -149,7 +149,10 @@ export const searchWikipedia = async (state: typeof InterviewState.State) => {
 
   const searchQuery = await searchChain.invoke({ conversation: messages });
 
+  console.log("searchQuery for Wikipedia:", searchQuery);
+
   const searchDocs = await queryMediaWiki(searchQuery.searchQuery);
+  console.log("searchDocs:", searchDocs);
 
   const formattedSearchDocs = searchDocs.map((data: WikipediaSearchResult) => {
     return `<Document source=${data.pageUrl} page=${data.pageNumber}>${data.fullContent}</Document>`;

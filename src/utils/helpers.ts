@@ -5,10 +5,12 @@ export interface WikipediaSearchResult {
   fullContent: string;
 }
 
-export async function queryMediaWiki(
+export const queryMediaWiki = async (
   query: string
-): Promise<WikipediaSearchResult[]> {
+): Promise<WikipediaSearchResult[]> => {
   const apiUrl = "https://en.wikipedia.org/w/api.php";
+
+  console.log("searchWiki-1...");
 
   try {
     const searchParams = new URLSearchParams({
@@ -19,7 +21,9 @@ export async function queryMediaWiki(
     });
 
     const searchResponse = await fetch(`${apiUrl}?${searchParams.toString()}`);
+    console.log("searchWiki-2...");
     const searchData = await searchResponse.json();
+    console.log("searchWiki-3...");
 
     const searchResults = searchData.query.search;
 
@@ -44,6 +48,8 @@ export async function queryMediaWiki(
       const contentResponse = await fetch(
         `${apiUrl}?${contentParams.toString()}`
       );
+
+      console.log("searchWiki-4...");
       const contentData = await contentResponse.json();
 
       // const pageContent = contentData.query.pages[pageId].revisions[0].content;
@@ -57,9 +63,11 @@ export async function queryMediaWiki(
       });
     }
 
+    console.log("searchWikiresults:", results);
+
     return results;
   } catch (error) {
     console.error("Error fetching Wikipedia data:", error);
     return [];
   }
-}
+};

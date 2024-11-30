@@ -82,9 +82,16 @@ const conductInterview = async () => {
     content: `So you said you were writing an article on ${input.topic}?`,
   });
   let config = { configurable: { thread_id: "interview-session-1" } };
-  const interview = interviewGraph.invoke({
-    analyst,
-    messages,
-    max_num_turns: 2,
-  });
+  const interview = await interviewGraph.invoke(
+    {
+      analyst,
+      messages,
+      max_num_turns: 2,
+    },
+    { ...config }
+  );
+
+  console.log("interview", interview);
 };
+
+conductInterview();
