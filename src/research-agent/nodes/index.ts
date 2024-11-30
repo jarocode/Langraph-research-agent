@@ -254,10 +254,28 @@ export const writeSection = async (state: typeof InterviewState.State) => {
   };
 };
 
-export const initiateAllInrterviews = async (
+export const initiateAllInterviews = async (
   state: typeof ResearchState.State
 ) => {
   console.log(
     "-- This is the 'map' step where we run each interview subgraph using the Send API --"
+  );
+
+  const { human_analyst_feedback, analysts, topic } = state;
+
+  //Check if human feedback
+  if (human_analyst_feedback) return "create_analysts";
+
+  //Otherwise kick off interviews in parallel via Send API()
+
+  return analysts.map(
+    (analyst: Analyst) =>
+      new Send("conduct_interview", {
+        analyst,
+        topic,
+        messages: new HumanMessage({
+          content: `So you said you were writing an article on ${topic}?`,
+        }),
+      })
   );
 };
