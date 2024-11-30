@@ -1,4 +1,4 @@
-import { END } from "@langchain/langgraph";
+import { END, Send } from "@langchain/langgraph";
 import { ChatPromptTemplate, PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
@@ -9,7 +9,12 @@ import {
 } from "@langchain/core/messages";
 
 import { model } from "../llm";
-import { GenerateAnalystState, Analyst, InterviewState } from "../states";
+import {
+  GenerateAnalystState,
+  Analyst,
+  InterviewState,
+  ResearchState,
+} from "../states";
 import {
   analystInstructions,
   answerInstructions,
@@ -247,4 +252,12 @@ export const writeSection = async (state: typeof InterviewState.State) => {
   return {
     sections: [section.content],
   };
+};
+
+export const initiateAllInrterviews = async (
+  state: typeof ResearchState.State
+) => {
+  console.log(
+    "-- This is the 'map' step where we run each interview subgraph using the Send API --"
+  );
 };
