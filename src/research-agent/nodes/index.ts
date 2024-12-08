@@ -19,6 +19,7 @@ import {
   analystInstructions,
   answerInstructions,
   questionInstructions,
+  reportWriterInstructions,
   searchInstructions,
   sectionWriterInstructions,
 } from "../prompts";
@@ -278,4 +279,29 @@ export const initiateAllInterviews = async (
         }),
       })
   );
+};
+
+export const writeReport = async (state: typeof ResearchState.State) => {
+  console.log("--WRITE REPORT NODE--");
+
+  const { sections, topic } = state;
+
+  //Concat all sections together
+  const formattedStringSections = sections.join("\n\n");
+
+  //Summarize the sections into a final report
+  const systemMessage = await PromptTemplate.fromTemplate(
+    reportWriterInstructions
+  ).format({ topic, context: formattedStringSections });
+
+  const report = await model.invoke([
+    new SystemMessage({ content: systemMessage }),
+    new HumanMessage({
+      content: `Write a report based upon these memos.`,
+    }),
+  ]);
+
+  return {
+    content: report.content,
+  };
 };
