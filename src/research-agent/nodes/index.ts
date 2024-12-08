@@ -18,6 +18,7 @@ import {
 import {
   analystInstructions,
   answerInstructions,
+  introConclusionInstructions,
   questionInstructions,
   reportWriterInstructions,
   searchInstructions,
@@ -304,4 +305,74 @@ export const writeReport = async (state: typeof ResearchState.State) => {
   return {
     content: report.content,
   };
+};
+export const writeIntroduction = async (state: typeof ResearchState.State) => {
+  console.log("--WRITE INTRODUCTION NODE--");
+
+  const { sections, topic } = state;
+
+  //Concat all sections together
+  const formattedStringSections = sections.join("\n\n");
+
+  //Summarize the sections into a final report
+  const instructions = await PromptTemplate.fromTemplate(
+    introConclusionInstructions
+  ).format({ topic, formattedStringSections });
+
+  const intro = await model.invoke([
+    instructions,
+    new HumanMessage({
+      content: `Write the report introduction"`,
+    }),
+  ]);
+
+  return {
+    introduction: intro.content,
+  };
+};
+export const writeConclusion = async (state: typeof ResearchState.State) => {
+  console.log("--WRITE INTRODUCTION NODE--");
+
+  const { sections, topic } = state;
+
+  //Concat all sections together
+  const formattedStringSections = sections.join("\n\n");
+
+  //Summarize the sections into a final report
+  const instructions = await PromptTemplate.fromTemplate(
+    introConclusionInstructions
+  ).format({ topic, formattedStringSections });
+
+  const conclusion = await model.invoke([
+    instructions,
+    new HumanMessage({
+      content: `Write the report conclusion"`,
+    }),
+  ]);
+
+  return {
+    conclusion: conclusion.content,
+  };
+};
+
+export const finalizeReport = async (state: typeof ResearchState.State) => {
+  console.log("--FINALIZE REPORT NODE--");
+
+  let { content, introduction, conclusion } = state;
+
+  if (content.startsWith("## Insights")) {
+    content = content.replace("## Insights", "");
+  }
+
+  let sources;
+  if (content.includes("## Sources")) {
+    [content, sources] = content.split("\n## Sources\n");
+  }
+
+  let final_report = `${introduction}\n\n---\n\n${content}\n\n---\n\n${conclusion}`;
+  if (sources) {
+    final_report += "\n\n## Sources\n" + sources;
+  }
+
+  return { final_report };
 };
